@@ -1,8 +1,70 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLineEdit, QListWidget, QListWidgetItem, QLabel, QHBoxLayout
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton, 
+                         QLineEdit, QListWidget, QListWidgetItem, QLabel, 
+                         QHBoxLayout, QSplitter, QFrame, QScrollArea)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 import sys
 
 from backend.ai_model import generate_response
+
+class ExpandableMenu(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.init_menu()
+        
+    def init_menu(self):
+        layout = QVBoxLayout(self)
+        self.buttons = []
+        self.content_widgets = []
+        
+        for i in range(8):
+            # Create button and content
+            button = QPushButton(f"Window {i+1}", self)
+            content = QFrame()
+            content.setFrameShape(QFrame.StyledPanel)
+            content.setStyleSheet("background-color: #2A2F32; margin: 0 10px;")
+            content_layout = QVBoxLayout(content)
+            content_layout.addWidget(QLabel(f"Content for Window {i+1}"))
+            content.setVisible(False)
+            
+            button.setStyleSheet("""
+                QPushButton {
+                    background-color: #2A2F32;
+                    color: white;
+                    border: none;
+                    text-align: left;
+                    padding: 10px;
+                    margin: 2px 10px;
+                }
+                QPushButton:hover {
+                    background-color: #3A3F41;
+                }
+            """)
+            
+            layout.addWidget(button)
+            layout.addWidget(content)
+            
+            self.buttons.append(button)
+            self.content_widgets.append(content)
+            
+            button.clicked.connect(lambda checked, index=i: self.toggle_content(index))
+    
+    def toggle_content(self, index):
+        # Hide all other content widgets
+        for i, content in enumerate(self.content_widgets):
+            if i != index:
+                content.setVisible(False)
+                self.buttons[i].setStyleSheet(self.buttons[i].styleSheet().replace("background-color: #3A3F41", "background-color: #2A2F32"))
+        
+        # Toggle the clicked content
+        current_content = self.content_widgets[index]
+        is_visible = current_content.isVisible()
+        current_content.setVisible(not is_visible)
+        
+        # Update button style
+        if not is_visible:
+            self.buttons[index].setStyleSheet(self.buttons[index].styleSheet().replace("background-color: #2A2F32", "background-color: #3A3F41"))
+        else:
+            self.buttons[index].setStyleSheet(self.buttons[index].styleSheet().replace("background-color: #3A3F41", "background-color: #2A2F32"))
 
 class Worker(QThread):
     finished = pyqtSignal(str)
@@ -45,10 +107,25 @@ class UI(QWidget):
     
     def init_ui(self):
         self.setWindowTitle("DevFlow")
-        self.setGeometry(100, 100, 800, 600)    # window size
+        self.setGeometry(100, 100, 1000, 600)    # increased window width to accommodate menu
 
         layout = QVBoxLayout()
-
+        
+        # Create main horizontal splitter
+        splitter = QSplitter(Qt.Horizontal)
+        
+        # Add expandable menu to left side
+        menu_scroll = QScrollArea()
+        menu_scroll.setWidget(ExpandableMenu())
+        menu_scroll.setWidgetResizable(True)
+        menu_scroll.setFixedWidth(250)  # Set fixed width for menu
+        menu_scroll.setStyleSheet("QScrollArea { border: none; background-color: #121B22; }")
+        splitter.addWidget(menu_scroll)
+        
+        # Create container for chat area
+        chat_container = QWidget()
+        chat_layout = QVBoxLayout(chat_container)
+        
         # chat display area 
         self.chat_list = QListWidget()
         self.chat_list.setStyleSheet("""
@@ -83,13 +160,13 @@ class UI(QWidget):
             }
         """)
         self.chat_list.verticalScrollBar().setSingleStep(1)
-        layout.addWidget(self.chat_list)
+        chat_layout.addWidget(self.chat_list)
 
         # input area layout (horizontal for input and button)
         input_layout = QHBoxLayout()
         
         # input field
-        self.input_field = QLineEdit(self)
+        self.input_field = QLineEdit()
         self.input_field.setStyleSheet("""
             background-color: #2A2F32;
             color: white;
@@ -119,7 +196,13 @@ class UI(QWidget):
         self.submit_button.clicked.connect(self.handle_submit)
         input_layout.addWidget(self.submit_button)
 
-        layout.addLayout(input_layout)
+        chat_layout.addLayout(input_layout)
+        
+        # Add chat container to splitter
+        splitter.addWidget(chat_container)
+        
+        # Add splitter to main layout
+        layout.addWidget(splitter)
         self.setLayout(layout)
 
         # Apply window background
