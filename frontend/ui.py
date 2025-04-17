@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton, 
-                         QLineEdit, QListWidget, QListWidgetItem, QLabel, 
-                         QHBoxLayout, QSplitter, QFrame, QScrollArea)
+                            QLineEdit, QListWidget, QListWidgetItem, QLabel, 
+                            QHBoxLayout, QSplitter, QFrame, QScrollArea)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 import sys
 
@@ -107,7 +107,7 @@ class UI(QWidget):
     
     def init_ui(self):
         self.setWindowTitle("DevFlow")
-        self.setGeometry(100, 100, 1000, 600)    # increased window width to accommodate menu
+        self.showMaximized()
 
         layout = QVBoxLayout()
         
@@ -118,13 +118,24 @@ class UI(QWidget):
         menu_scroll = QScrollArea()
         menu_scroll.setWidget(ExpandableMenu())
         menu_scroll.setWidgetResizable(True)
-        menu_scroll.setFixedWidth(250)  # Set fixed width for menu
+        
+        # Set width for menu container (2/3 of screen width)
+        screen = QApplication.primaryScreen().size()
+        menu_width = int(screen.width() * 0.67)  # 67% of screen width
+        menu_scroll.setMinimumWidth(menu_width)
+        menu_scroll.setMaximumWidth(menu_width)
         menu_scroll.setStyleSheet("QScrollArea { border: none; background-color: #121B22; }")
         splitter.addWidget(menu_scroll)
         
         # Create container for chat area
         chat_container = QWidget()
         chat_layout = QVBoxLayout(chat_container)
+        
+        # Set width for chat container (1/3 of screen width)
+        screen = QApplication.primaryScreen().size()
+        chat_width = int(screen.width() * 0.3)  # 33% of screen width
+        chat_container.setMinimumWidth(chat_width)
+        chat_container.setMaximumWidth(chat_width)
         
         # chat display area 
         self.chat_list = QListWidget()
