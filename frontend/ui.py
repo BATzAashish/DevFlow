@@ -231,7 +231,10 @@ class UI(QWidget):
         '''
         item = QListWidgetItem()
         widget = QLabel(message)
-        widget.setWordWrap(True)
+        
+        # Create metrics to measure text width
+        metrics = widget.fontMetrics()
+        text_width = metrics.horizontalAdvance(message)
 
         # Create container widget to handle padding consistently
         container = QWidget()
@@ -243,6 +246,9 @@ class UI(QWidget):
         screen = QApplication.primaryScreen().size()
         chat_width = int(screen.width() * 0.3)  # 30% of screen width
         message_max_width = int(chat_width * 0.75)  # 75% of chat width
+
+        # Only enable word wrap if text would exceed max width
+        widget.setWordWrap(text_width > message_max_width)
 
         if sender == 'User':
             bg_color = '#005C4B'
