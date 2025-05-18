@@ -239,15 +239,20 @@ class UI(QWidget):
         container_layout.setContentsMargins(15, 2, 15, 2)  # Minimal vertical margins
         container_layout.setSpacing(0)
 
+        # Calculate 75% of chat width (30% of screen)
+        screen = QApplication.primaryScreen().size()
+        chat_width = int(screen.width() * 0.3)  # 30% of screen width
+        message_max_width = int(chat_width * 0.75)  # 75% of chat width
+
         if sender == 'User':
             bg_color = '#005C4B'
-            container_layout.addStretch()
-            margin_style = "margin: 3px 0px 3px 100px;" # Even margins top/bottom
+            container_layout.addStretch()  # Push to right
+            margin_style = "margin: 3px 0px 3px 0px;" # Remove left margin since we're using fixed width
         else:
             bg_color = '#6495ED'
-            margin_style = "margin: 3px 100px 3px 0px;" # Even margins top/bottom
+            margin_style = "margin: 3px 0px 3px 0px;" # Remove right margin since we're using fixed width
 
-        # Set base style for the message
+        # Set base style for the message with max-width
         widget.setStyleSheet(f"""
             background-color: {bg_color};
             color: white;
@@ -255,11 +260,14 @@ class UI(QWidget):
             padding: 10px 14px;
             {margin_style}
         """)
+        
+        # Set maximum width for the message
+        widget.setMaximumWidth(message_max_width)
 
         # Add message to container with proper alignment
+        if sender == 'User':
+            container_layout.addStretch()  # Add stretch before widget for user messages
         container_layout.addWidget(widget)
-        if sender != 'User':
-            container_layout.addStretch()
 
         # Let the widget calculate its natural size
         widget.adjustSize()
