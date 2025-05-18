@@ -146,7 +146,8 @@ class UI(QWidget):
             }
             QListWidget::item {
                 border: none;
-                margin: 5px;
+                padding: 0px;
+                margin: 0px;
             }
             QScrollBar:vertical {
                 background-color: #121B22;
@@ -169,7 +170,12 @@ class UI(QWidget):
             QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
                 background: none;
             }
+            QScrollBar:horizontal {
+                height: 0px;
+                background: transparent;
+            }
         """)
+        self.chat_list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.chat_list.verticalScrollBar().setSingleStep(1)
         chat_layout.addWidget(self.chat_list)
 
@@ -227,31 +233,46 @@ class UI(QWidget):
         widget = QLabel(message)
         widget.setWordWrap(True)
 
-        # set background color based on sender
-        bg_color = '#6495ED' if sender == 'DevFlow Bot' else '#005C4B' 
+        # Create container widget to handle padding consistently
+        container = QWidget()
+        container_layout = QHBoxLayout(container)
+        container_layout.setContentsMargins(15, 2, 15, 2)  # Minimal vertical margins
+        container_layout.setSpacing(0)
+
+        if sender == 'User':
+            bg_color = '#005C4B'
+            container_layout.addStretch()
+            margin_style = "margin: 3px 0px 3px 100px;" # Even margins top/bottom
+        else:
+            bg_color = '#6495ED'
+            margin_style = "margin: 3px 100px 3px 0px;" # Even margins top/bottom
+
+        # Set base style for the message
         widget.setStyleSheet(f"""
             background-color: {bg_color};
             color: white;
             border-radius: 10px;
-            padding: 15px;
-            max-width: 700px;
+            padding: 10px 14px;
+            {margin_style}
         """)
 
-        widget.adjustSize()
-        size = widget.sizeHint()
-        size.setHeight(size.height() + 5)  
-        item.setSizeHint(size)
+        # Add message to container with proper alignment
+        container_layout.addWidget(widget)
+        if sender != 'User':
+            container_layout.addStretch()
 
-        # align messages (right for user, left for bot)
-        if sender == 'User':
-            item.setTextAlignment(Qt.AlignmentFlag.AlignRight)
-            widget.setStyleSheet(widget.styleSheet() + "margin-left: 180px;")
-        else:
-            item.setTextAlignment(Qt.AlignmentFlag.AlignLeft)
-            widget.setStyleSheet(widget.styleSheet() + "margin-right: 180px;")
+        # Let the widget calculate its natural size
+        widget.adjustSize()
+        
+        # Set precise size for the container
+        size = widget.sizeHint()
+        container.setFixedHeight(size.height() + 6)  # Add small padding for margins
+        
+        # Set the size hint for the list item
+        item.setSizeHint(container.sizeHint())
 
         self.chat_list.addItem(item)
-        self.chat_list.setItemWidget(item, widget)
+        self.chat_list.setItemWidget(item, container)
         self.chat_list.scrollToBottom()
 
     def handle_submit(self):
