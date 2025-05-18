@@ -1,16 +1,43 @@
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, 
-                            QSplitter, QScrollArea)
+                            QSplitter, QScrollArea, QMessageBox)
 from PyQt5.QtCore import Qt
 import sys
+import os
 
 from .menu_interface import ExpandableMenu
 from .chat_interface import ChatInterface
+from .project_setup import ProjectSetupDialog
 
 class UI(QWidget):
     def __init__(self, store):
         super().__init__()
         self.store = store
-        self.init_ui()
+        
+        # Show project setup dialog
+        dialog = ProjectSetupDialog(self)
+        dialog.setFixedSize(500, 450)  # Set a reasonable size for the dialog
+        result = dialog.exec_()
+        
+        if result == ProjectSetupDialog.Accepted:
+            project_info = dialog.get_project_info()
+            # Create project directory if it doesn't exist
+            project_path = os.path.join(project_info['location'], project_info['name'])
+            try:
+                os.makedirs(project_path, exist_ok=True)
+                self.project_path = project_path
+                self.project_name = project_info['name']
+                self.project_description = project_info['description']
+                QMessageBox.information(
+                    self,
+                    "Success",
+                    f"Project folder created successfully at:\n{project_path}"
+                )
+                self.init_ui()
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to create project directory: {str(e)}")
+                sys.exit(1)
+        else:
+            sys.exit(0)
     
     def init_ui(self):
         self.setWindowTitle("DevFlow")
