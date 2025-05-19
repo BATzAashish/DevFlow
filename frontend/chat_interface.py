@@ -31,7 +31,6 @@ class Worker(QThread):
         
         ANSWER:
         """
-        print(prompt)
         return prompt
 
     def run(self):
@@ -65,24 +64,31 @@ class ChatInterface(QWidget):
                 margin: 0px;
             }
             QScrollBar:vertical {
-                background-color: #121B22;
-                width: 12px;
-                margin: 16px 0 16px 0;
-                border: 1px solid #121B22;
+                border: none;
+                background: #121B22;
+                width: 10px;
+                margin: 0px;
             }
             QScrollBar::handle:vertical {
-                background-color: #888888;
-                min-height: 20px;
-                border-radius: 6px;
+                background-color: #404B53;
+                min-height: 30px;
+                border-radius: 5px;
+                margin: 3px 2px 3px 2px;
             }
             QScrollBar::handle:vertical:hover {
-                background-color: #555555;
+                background-color: #515B63;
             }
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-                border: none;
+            QScrollBar::add-line:vertical,
+            QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+            QScrollBar::add-page:vertical,
+            QScrollBar::sub-page:vertical {
                 background: none;
+                height: 0px;
             }
-            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+            QScrollBar::up-arrow:vertical,
+            QScrollBar::down-arrow:vertical {
                 background: none;
             }
             QScrollBar:horizontal {
@@ -90,8 +96,9 @@ class ChatInterface(QWidget):
                 background: transparent;
             }
         """)
+        self.chat_list.setVerticalScrollMode(QListWidget.ScrollPerPixel)
         self.chat_list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.chat_list.verticalScrollBar().setSingleStep(1)
+        self.chat_list.verticalScrollBar().setSingleStep(10)
         chat_layout.addWidget(self.chat_list)
 
         # input area layout
