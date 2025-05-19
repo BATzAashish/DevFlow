@@ -2,11 +2,12 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QPushButton,
                             QLabel, QFrame, QHBoxLayout)
 from PyQt5.QtCore import Qt
 from .tech_stack_dialog import TechStackDialog
+from backend.project_config import ProjectConfig
 
 class ExpandableMenu(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.tech_stack = ""
+        self.config = ProjectConfig()
         self.init_menu()
         
     def init_menu(self):
@@ -127,7 +128,8 @@ class ExpandableMenu(QWidget):
             self.buttons[index].setStyleSheet(self.buttons[index].styleSheet().replace("background-color: #3A3F41", "background-color: #2A2F32"))
     
     def edit_tech_stack(self):
-        dialog = TechStackDialog(self.tech_stack, self)
+        dialog = TechStackDialog(self.config.tech_stack, self)
         if dialog.exec_() == TechStackDialog.Accepted:
-            self.tech_stack = dialog.get_tech_stack()
-            self.tech_stack_label.setText(self.tech_stack if self.tech_stack else "No tech stack selected")
+            tech_stack = dialog.get_tech_stack()
+            self.config.update_tech_stack(tech_stack)
+            self.tech_stack_label.setText(tech_stack if tech_stack else "No tech stack selected")

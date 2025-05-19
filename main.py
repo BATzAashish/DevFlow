@@ -3,9 +3,13 @@ from PyQt5.QtWidgets import QApplication
 
 from backend.vector_store import VectorStore
 from frontend.ui import UI
+from backend.project_config import ProjectConfig
 
 if __name__ == "__main__":
     try:
+        # Initialize the project configuration
+        config = ProjectConfig()
+        
         # Initialize the vector store
         store = VectorStore()
         print("Syncing ChromaDB with ./docs/ directory")

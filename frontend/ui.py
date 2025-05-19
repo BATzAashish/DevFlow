@@ -4,6 +4,8 @@ from PyQt5.QtCore import Qt
 import sys
 import os
 
+from backend.project_config import ProjectConfig
+
 from .menu_interface import ExpandableMenu
 from .chat_interface import ChatInterface
 from .project_setup import ProjectSetupDialog
@@ -24,9 +26,15 @@ class UI(QWidget):
             project_path = os.path.join(project_info['location'], project_info['name'])
             try:
                 os.makedirs(project_path, exist_ok=True)
-                self.project_path = project_path
-                self.project_name = project_info['name']
-                self.project_description = project_info['description']
+                
+                # Update project configuration
+                config = ProjectConfig()
+                config.update_project_info(
+                    path=project_path,
+                    name=project_info['name'],
+                    description=project_info['description']
+                )
+                
                 QMessageBox.information(
                     self,
                     "Success",
