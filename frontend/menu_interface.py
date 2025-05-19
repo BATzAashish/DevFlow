@@ -92,6 +92,10 @@ class ExpandableMenu(QWidget):
 
                 content_layout.addWidget(tech_frame)
             elif i == 1:  # Step 2: Environment and Repository Setup
+                # Create a horizontal layout for the venv and git boxes
+                hbox = QHBoxLayout()
+                hbox.setSpacing(20)
+
                 # Python venv option (only if 'python' in tech stack)
                 if 'python' in self.config.tech_stack.lower():
                     venv_frame = QFrame()
@@ -100,32 +104,54 @@ class ExpandableMenu(QWidget):
                             background-color: #23282C;
                             border: 1px solid #3A3F41;
                             border-radius: 4px;
-                            margin: 5px 0 10px 0;
+                            margin: 5px;
                         }
                     """)
-                    venv_layout = QHBoxLayout(venv_frame)
+                    venv_vlayout = QVBoxLayout(venv_frame)
+                    venv_vlayout.setContentsMargins(20, 20, 20, 20)
+                    venv_vlayout.setSpacing(15)
+                    
+                    # Create inner frame for content
+                    inner_frame = QFrame()
+                    inner_frame.setStyleSheet("""
+                        QFrame {
+                            background-color: #1E2428;
+                            border: 1px solid #3A3F41;
+                            border-radius: 4px;
+                            padding: 15px;
+                        }
+                    """)
+                    inner_layout = QVBoxLayout(inner_frame)
+                    inner_layout.setSpacing(15)
+                    
                     venv_label = QLabel("Python Virtual Environment Setup")
                     venv_label.setStyleSheet("color: white; font-size: 15px;")
-                    venv_layout.addWidget(venv_label)
-                    venv_layout.addStretch()
-                    venv_btn = QPushButton("Create")
-                    venv_btn.setFixedHeight(30)
+                    venv_label.setAlignment(Qt.AlignCenter)
+                    inner_layout.addWidget(venv_label)
+                    
+                    # Add a stretch to push the button to the bottom
+                    inner_layout.addStretch()
+                    
+                    venv_btn = QPushButton("Create Environment")
+                    venv_btn.setFixedHeight(35)
                     venv_btn.setStyleSheet("""
                         QPushButton {
                             background-color: #00A884;
                             color: white;
                             border: none;
-                            padding: 6px 16px;
+                            padding: 8px 0;
                             border-radius: 4px;
-                            font-size: 13px;
+                            font-size: 14px;
+                            min-width: 200px;
                         }
                         QPushButton:hover {
                             background-color: #008C74;
                         }
                     """)
                     venv_btn.clicked.connect(self.create_python_venv)
-                    venv_layout.addWidget(venv_btn)
-                    content_layout.addWidget(venv_frame)
+                    inner_layout.addWidget(venv_btn, alignment=Qt.AlignCenter)
+                    venv_vlayout.addWidget(inner_frame)
+                    hbox.addWidget(venv_frame)
 
                 # Git repo option (always shown)
                 git_frame = QFrame()
@@ -134,32 +160,60 @@ class ExpandableMenu(QWidget):
                         background-color: #23282C;
                         border: 1px solid #3A3F41;
                         border-radius: 4px;
-                        margin: 5px 0 10px 0;
+                        margin: 5px;
                     }
                 """)
-                git_layout = QHBoxLayout(git_frame)
+                git_vlayout = QVBoxLayout(git_frame)
+                git_vlayout.setContentsMargins(20, 20, 20, 20)
+                git_vlayout.setSpacing(15)
+
+                # Create inner frame for content
+                inner_frame = QFrame()
+                inner_frame.setStyleSheet("""
+                    QFrame {
+                        background-color: #1E2428;
+                        border: 1px solid #3A3F41;
+                        border-radius: 4px;
+                        padding: 15px;
+                    }
+                """)
+                inner_layout = QVBoxLayout(inner_frame)
+                inner_layout.setSpacing(15)
+                
                 git_label = QLabel("Git Repository Setup")
                 git_label.setStyleSheet("color: white; font-size: 15px;")
-                git_layout.addWidget(git_label)
-                git_layout.addStretch()
-                git_btn = QPushButton("Create")
-                git_btn.setFixedHeight(30)
+                git_label.setAlignment(Qt.AlignCenter)
+                inner_layout.addWidget(git_label)
+                
+                # Add a stretch to push the button to the bottom
+                inner_layout.addStretch()
+                
+                git_btn = QPushButton("Create Repository")
+                git_btn.setFixedHeight(35)
                 git_btn.setStyleSheet("""
                     QPushButton {
                         background-color: #00A884;
                         color: white;
                         border: none;
-                        padding: 6px 16px;
+                        padding: 8px 0;
                         border-radius: 4px;
-                        font-size: 13px;
+                        font-size: 14px;
+                        min-width: 200px;
                     }
                     QPushButton:hover {
                         background-color: #008C74;
                     }
                 """)
                 git_btn.clicked.connect(self.create_git_repo)
-                git_layout.addWidget(git_btn)
-                content_layout.addWidget(git_frame)
+                inner_layout.addWidget(git_btn, alignment=Qt.AlignCenter)
+                git_vlayout.addWidget(inner_frame)
+                hbox.addWidget(git_frame, 1)  # Add stretch factor 1 to make it expand
+
+                if 'python' in self.config.tech_stack.lower():
+                    # Set the first frame to also stretch if it exists
+                    hbox.setStretchFactor(venv_frame, 1)
+                
+                content_layout.addLayout(hbox)
             else:
                 content_layout.addWidget(QLabel(f"Content for {step_names[i]}"))
             content.setVisible(False)
