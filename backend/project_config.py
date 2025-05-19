@@ -12,6 +12,8 @@ class ProjectConfig:
         self.project_name = ""
         self.project_description = ""
         self.tech_stack = ""
+        self.has_venv = False
+        self.has_git = False
         
     @property
     def is_tech_stack_set(self):
@@ -28,6 +30,15 @@ class ProjectConfig:
     def update_tech_stack(self, tech_stack):
         self.tech_stack = tech_stack
         
+    def update_project_path(self, path):
+        self.project_path = path
+        
+    def set_venv_status(self, status):
+        self.has_venv = status
+        
+    def set_git_status(self, status):
+        self.has_git = status
+
     def get_project_info(self):
         return {
             "path": self.project_path,

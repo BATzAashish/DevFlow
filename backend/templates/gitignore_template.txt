@@ -1,0 +1,240 @@
+##############################
+# 💻 OS / IDE Specific Files #
+##############################
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# VS Code
+.vscode/
+.history/
+
+# JetBrains (PyCharm, IntelliJ, etc.)
+.idea/
+
+# Sublime
+*.sublime-workspace
+*.sublime-project
+
+######################
+# 🔧 General Patterns #
+######################
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+*.pid
+*.seed
+*.pid.lock
+
+# Build output
+/dist
+/build
+/tmp
+/temp
+/out
+/bin
+/target
+
+# Dependency folders
+/node_modules
+/.pnp
+.pnp.js
+
+# dotenv environment files
+.env
+.env.*
+!.env.example
+
+# Backup files
+*.bak
+*.swp
+*.swo
+*.tmp
+
+# Compiled source
+*.pyc
+*.class
+*.o
+*.out
+*.exe
+
+#################
+# 🐍 Python      #
+#################
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+.eggs/
+build/
+develop-eggs/
+dist/
+pip-wheel-metadata/
+*.manifest
+*.spec
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+
+# PyInstaller
+*.spec
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb~
+
+# Pytest cache
+.cache/
+.pytest_cache/
+
+####################
+# 🌐 Node.js / JS  #
+####################
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log
+package-lock.json
+yarn.lock
+
+###################
+# 🧪 Testing      #
+###################
+coverage/
+*.lcov
+.nyc_output/
+__snapshots__/
+
+####################
+# ⚛️ React / Web   #
+####################
+# React / Next.js
+.next/
+out/
+.vercel/
+.netlify/
+.cache/
+
+# Vue
+dist/
+.vuepress/
+node_modules/
+
+# Svelte
+.svelte-kit/
+.svelte/
+
+##################
+# 🐘 PHP / Laravel #
+##################
+vendor/
+composer.lock
+.env
+.phpunit.result.cache
+
+#########################
+# ☕ Java / Kotlin / Gradle #
+#########################
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+.gradle/
+build/
+target/
+out/
+
+##################
+# 🐘 Maven       #
+##################
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+
+##################
+# ☕ Android      #
+##################
+*.apk
+*.ap_
+*.dex
+*.class
+*.log
+/build/
+captures/
+outputs/
+.cxx/
+.idea/
+.gradle/
+local.properties
+
+#####################
+# 🐳 Docker         #
+#####################
+.dockerignore
+Dockerfile
+docker-compose.yml
+docker-compose.override.yml
+**/docker-compose.*.yml
+
+##################
+# 📦 Package Tools #
+##################
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# conda
+*.conda
+*.condarc
+*.conda-lock
+.env
+
+#####################
+# 🧠 ML / Data Files #
+#####################
+*.h5
+*.ckpt
+*.weights
+*.tfrecord
+*.pth
+*.pkl
+*.joblib
+*.csv
+*.tsv
+*.xls
+*.xlsx
+*.db
+*.sqlite
+*.sqlite3
+*.npy
+*.npz
