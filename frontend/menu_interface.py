@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QPushButton,
                             QLabel, QFrame, QHBoxLayout, QMessageBox)
 from PyQt5.QtCore import Qt
 import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import subprocess
 import uuid
 import sys
@@ -142,7 +143,6 @@ class ExpandableMenu(QWidget):
                     # Add a stretch to push the button to the bottom
                     inner_layout.addStretch()
                     
-                    # Virtual Environment Button
                     venv_btn = QPushButton("Create Environment")
                     venv_btn.setFixedHeight(35)
                     venv_btn.setStyleSheet("""
