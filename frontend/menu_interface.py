@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QPushButton, 
-                            QLabel, QFrame, QHBoxLayout, QMessageBox)
+                            QLabel, QFrame, QHBoxLayout, QMessageBox, QScrollArea)
 from PyQt5.QtCore import Qt
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -32,7 +32,7 @@ class ExpandableMenu(QWidget):
         step_names = [
             "Step 1: Choose Tech Stack",
             "Step 2: Environment and Repository Setup",
-            "Window 3",
+            "Step 3: Create Project Structure",
             "Window 4",
             "Window 5",
             "Window 6",
@@ -228,6 +228,102 @@ class ExpandableMenu(QWidget):
                     hbox.setStretchFactor(venv_frame, 1)
                 
                 content_layout.addLayout(hbox)
+            elif i == 2:  # Step 3: Create Project Structure
+                # Create a frame to act as a text box
+                structure_frame = QFrame()
+                structure_frame.setStyleSheet("""
+                    QFrame {
+                        background-color: #1E2428;
+                        border: 1px solid #3F3F41;
+                        border-radius: 4px;
+                        margin: 5px;
+                    }
+                """)
+                structure_frame_layout = QVBoxLayout(structure_frame)
+                structure_frame_layout.setContentsMargins(15, 15, 15, 15)
+
+                # File structure display area
+                structure_text = self.config.file_structure if hasattr(self.config, 'file_structure') and self.config.file_structure.strip() else "No structure generated yet"
+                
+                # Create scroll area for the structure display
+                scroll_area = QScrollArea()
+                scroll_area.setWidgetResizable(True)
+                scroll_area.setStyleSheet("""
+                    QScrollArea {
+                        border: none;
+                        background-color: #2A2F32;
+                        border-radius: 4px;
+                    }
+                    QScrollBar:vertical {
+                        border: none;
+                        background: #2A2F32;
+                        width: 10px;
+                        margin: 0px;
+                    }
+                    QScrollBar::handle:vertical {
+                        background: #3A3F41;
+                        min-height: 20px;
+                        border-radius: 5px;
+                    }
+                    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                        border: none;
+                        background: none;
+                    }
+                """)
+
+                # Create container widget for the label
+                container = QWidget()
+                container_layout = QVBoxLayout(container)
+                container_layout.setContentsMargins(0, 0, 0, 0)
+
+                self.structure_label = QLabel(structure_text)
+                self.structure_label.setStyleSheet("""
+                    QLabel {
+                        color: white;
+                        padding: 15px;
+                        background-color: #2A2F32;
+                        border-radius: 4px;
+                        font-family: "Consolas", "Monaco", "Courier New", monospace;
+                        white-space: pre;
+                        font-size: 12px;
+                        line-height: 1.5;
+                        letter-spacing: 0.3px;
+                    }
+                """)
+                self.structure_label.setWordWrap(False)
+                self.structure_label.setTextFormat(Qt.PlainText)
+                self.structure_label.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+                
+                # Add label to container
+                container_layout.addWidget(self.structure_label)
+                container_layout.addStretch()
+                
+                # Set container as scroll area widget
+                scroll_area.setWidget(container)
+                scroll_area.setMinimumHeight(300)  # Set a good default height
+                
+                structure_frame_layout.addWidget(scroll_area)
+
+                # Generate button at the bottom
+                generate_button = QPushButton("Generate Structure")
+                generate_button.setFixedHeight(35)
+                generate_button.setStyleSheet("""
+                    QPushButton {
+                        background-color: #00A884;
+                        color: white;
+                        border: none;
+                        padding: 8px;
+                        border-radius: 4px;
+                        font-size: 14px;
+                    }
+                    QPushButton:hover {
+                        background-color: #008C74;
+                    }
+                """)
+                generate_button.clicked.connect(self.generate_structure)
+                structure_frame_layout.addWidget(generate_button)
+
+                content_layout.addWidget(structure_frame)
             else:
                 content_layout.addWidget(QLabel(f"Content for {step_names[i]}"))
             content.setVisible(False)
@@ -433,3 +529,33 @@ class ExpandableMenu(QWidget):
             self.content_widgets[expand_index].setVisible(True)
             # Also update button style
             self.buttons[expand_index].setStyleSheet(self.buttons[expand_index].styleSheet().replace("background-color: #2A2F32", "background-color: #3A3F41"))
+
+    def generate_structure(self):
+        if not self.config.tech_stack:
+            QMessageBox.warning(self, "Warning", "Please set up the tech stack first!")
+            return
+            
+        if not self.config.project_path:
+            QMessageBox.warning(self, "Warning", "Please set up the project path first!")
+            return
+            
+        # Get the project type from the project path
+        project_name = os.path.basename(self.config.project_path)
+            
+        try:
+            # Generate structure using Gemini
+            prompt = f"Provide ONLY professional and detailed file structure for a {project_name} project using {self.config.tech_stack}. NO EXPLANATION."
+            response = generate_response(prompt)
+                        
+            # Update the UI and save to config
+            self.structure_label.setText(response)
+            if hasattr(self.config, 'update_file_structure'):
+                self.config.update_file_structure(response)
+                
+        except Exception as e:
+            error_id = str(uuid.uuid4())[:8]
+            self.show_error_dialog(
+                str(e),
+                error_id,
+                "generating project structure"
+            )

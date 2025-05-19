@@ -14,6 +14,7 @@ class ProjectConfig:
         self.tech_stack = ""
         self.has_venv = False
         self.has_git = False
+        self.file_structure = ""
         
     @property
     def is_tech_stack_set(self):
@@ -38,6 +39,9 @@ class ProjectConfig:
         
     def set_git_status(self, status):
         self.has_git = status
+
+    def update_file_structure(self, structure):
+        self.file_structure = structure
 
     def get_project_info(self):
         return {
