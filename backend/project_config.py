@@ -48,5 +48,8 @@ class ProjectConfig:
             "path": self.project_path,
             "name": self.project_name,
             "description": self.project_description,
-            "tech_stack": self.tech_stack
+            "tech_stack": self.tech_stack,
+            "file_structure": self.file_structure,
+            "has_venv": self.has_venv,
+            "has_git": self.has_git
         }

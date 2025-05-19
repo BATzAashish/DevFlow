@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QPushButton,
                             QHBoxLayout)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtWidgets import QApplication
+from backend.project_config import ProjectConfig
 
 from backend.ai_model import generate_response
 
@@ -13,14 +14,24 @@ class Worker(QThread):
         super().__init__(parent)
         self.store = store
         self.query = query
+        self.project_config = ProjectConfig()
     
     def make_rag_prompt(self, query, relevant_chunks):
         escaped_chunks = " ".join(relevant_chunks).replace("'", "").replace('"', '').replace("\n", " ")
-        prompt = f"""You are a helpful and informative bot that answers questions using text from the reference chunks below. Provide a clear and concise response, such as a step-by-step guide or explanation, based on the query. If the chunks are irrelevant, provide a general answer based on your knowledge.
+        project_info = self.project_config.get_project_info()
+        prompt = f"""You are a helpful and informative bot that answers questions using text from the reference chunks below. You have access to the current project context which you should use to provide more relevant answers.
+        
+        PROJECT CONTEXT:
+        {project_info}
+        
         QUESTION: '{query}'
         REFERENCE CHUNKS: '{escaped_chunks}'
+        
+        Provide a clear and concise response, such as a step-by-step guide or explanation, based on the query and project context. If the chunks are irrelevant, provide a general answer based on your knowledge while still considering the project context.
+        
         ANSWER:
         """
+        print(prompt)
         return prompt
 
     def run(self):
