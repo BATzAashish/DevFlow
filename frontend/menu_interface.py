@@ -539,12 +539,9 @@ class ExpandableMenu(QWidget):
             QMessageBox.warning(self, "Warning", "Please set up the project path first!")
             return
             
-        # Get the project type from the project path
-        project_name = os.path.basename(self.config.project_path)
-            
         try:
             # Generate structure using Gemini
-            prompt = f"Provide ONLY professional and detailed file structure for a {project_name} project using {self.config.tech_stack}. NO EXPLANATION."
+            prompt = f"Generate a professional and detailed file structure for a project named \"{self.config.project_name}\". The project description is: \"{self.config.project_description}\". The tech stack to be used is: \"{self.config.tech_stack}\". Provide ONLY the file structure in a clear, hierarchical format. Do not include any explanations, descriptions, or code snippets."
             response = generate_response(prompt)
                         
             # Update the UI and save to config
