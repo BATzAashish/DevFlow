@@ -7,8 +7,10 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import subprocess
 import uuid
 import sys
+import json
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from .tech_stack_dialog import TechStackDialog
+from .components import CodeSnippetWidget, CommandWidget
 from backend.project_config import ProjectConfig
 from backend.ai_model import generate_response
 
@@ -307,32 +309,37 @@ class ExpandableMenu(QWidget):
                 implementation_frame_layout = QVBoxLayout(implementation_frame)
                 implementation_frame_layout.setContentsMargins(15, 15, 15, 15)
 
-                # Create text edit for implementation display
-                self.implementation_text = QTextEdit()
-                self.implementation_text.setReadOnly(True)
-                self.implementation_text.setText("No implementation generated yet")
-                self.implementation_text.setStyleSheet("""
-                    QTextEdit {
-                        color: white;
-                        padding: 15px;
-                        background-color: #2A2F32;
+                # Create scroll area for implementation display
+                scroll_area = QScrollArea()
+                scroll_area.setWidgetResizable(True)
+                scroll_area.setStyleSheet("""
+                    QScrollArea {
+                        background-color: transparent;
                         border: none;
-                        border-radius: 4px;
-                        font-family: "Consolas", "Monaco", "Courier New", monospace;
-                        font-size: 12px;
-                        line-height: 1.5;
-                        letter-spacing: 0.3px;
-                    }
-                    QTextEdit:focus {
-                        border: none;
-                        outline: none;
                     }
                 """)
-                self.implementation_text.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-                self.implementation_text.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-                self.implementation_text.setMinimumHeight(300)
                 
-                implementation_frame_layout.addWidget(self.implementation_text)
+                # Container for implementation content
+                self.implementation_container = QWidget()
+                self.implementation_container.setStyleSheet("""
+                    QWidget {
+                        background-color: transparent;
+                    }
+                """)
+                container_layout = QVBoxLayout(self.implementation_container)
+                container_layout.setSpacing(15)
+                
+                # Default message
+                default_label = QLabel("No implementation generated yet")
+                default_label.setStyleSheet("color: white; font-size: 14px;")
+                default_label.setAlignment(Qt.AlignCenter)
+                container_layout.addWidget(default_label)
+                
+                scroll_area.setWidget(self.implementation_container)
+                
+                # Add scroll area to frame layout
+                scroll_area.setMinimumHeight(300)
+                implementation_frame_layout.addWidget(scroll_area)
 
                 # Generate button
                 generate_button = QPushButton("Generate Implementation")
@@ -843,11 +850,37 @@ Return the output in the following JSON format ONLY, with no additional explanat
 """
             response = generate_response(prompt)
             
+            # Clean the response by removing markdown code block markers
+            cleaned_json = response.strip()
+            
+            # Remove ```json or ``` from the start
+            if cleaned_json.startswith('```'):
+                first_newline = cleaned_json.find('\n')
+                if first_newline != -1:
+                    cleaned_json = cleaned_json[first_newline + 1:]
+            
+            # Remove ``` from the end
+            if cleaned_json.endswith('```'):
+                cleaned_json = cleaned_json.rsplit('\n', 1)[0]
+            
+            # Final cleanup
+            cleaned_json = cleaned_json.strip()
+            
+            try:
+                # Try parsing the cleaned JSON to validate it
+                json.loads(cleaned_json)
+                print("JSON parsing successful!")
+            except json.JSONDecodeError as je:
+                print(f"JSON parsing failed. Error: {str(je)}")
+                print("Position of error:", je.pos)
+                print("Line number of error:", je.lineno)
+                print("Column of error:", je.colno)
+            
             # Update the UI and save to config
-            self.implementation_text.setText(response)
+            self.update_implementation_display(cleaned_json)
             if hasattr(self.config, 'update_implementation'):
-                self.config.update_implementation(response)
-                
+                self.config.update_implementation(cleaned_json)
+            
         except Exception as e:
             error_id = str(uuid.uuid4())[:8]
             self.show_error_dialog(
@@ -1003,3 +1036,37 @@ Please create a comprehensive README.md that includes:
                 error_id,
                 "saving README file"
             )
+
+    def update_implementation_display(self, json_str):
+        # Clear existing widgets
+        for i in reversed(range(self.implementation_container.layout().count())): 
+            self.implementation_container.layout().itemAt(i).widget().setParent(None)
+        
+        try:
+            data = json.loads(json_str)
+            
+            # Add file implementations
+            if 'files' in data:
+                file_label = QLabel("Generated Files:")
+                file_label.setStyleSheet("color: #00A884; font-size: 16px; font-weight: bold;")
+                self.implementation_container.layout().addWidget(file_label)
+                
+                for file_name, content in data['files'].items():
+                    snippet = CodeSnippetWidget(file_name, content)
+                    self.implementation_container.layout().addWidget(snippet)
+            
+            # Add setup steps
+            if 'setup_steps' in data:
+                steps_label = QLabel("Setup Steps:")
+                steps_label.setStyleSheet("color: #00A884; font-size: 16px; font-weight: bold;")
+                self.implementation_container.layout().addWidget(steps_label)
+                
+                for command, cmd_type in data['setup_steps']:
+                    cmd_widget = CommandWidget(command, cmd_type == 'terminal_command')
+                    self.implementation_container.layout().addWidget(cmd_widget)
+            
+        except json.JSONDecodeError as e:
+            error_label = QLabel("Error parsing implementation JSON")
+            error_label.setStyleSheet("color: red;")
+            self.implementation_container.layout().addWidget(error_label)
+            print(f"JSON parse error: {str(e)}")
