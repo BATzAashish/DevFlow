@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, 
                             QSplitter, QScrollArea, QMessageBox,
-                            QLabel, QHBoxLayout)
+                            QLabel, QHBoxLayout, QPushButton)
 from PyQt5.QtCore import Qt
 import sys
 import os
@@ -10,6 +10,7 @@ from backend.project_config import ProjectConfig
 from .menu_interface import ExpandableMenu
 from .chat_interface import ChatInterface
 from .project_setup import ProjectSetupDialog
+from .settings_dialog import SettingsDialog
 
 class UI(QWidget):
     def __init__(self, store):
@@ -48,6 +49,10 @@ class UI(QWidget):
         else:
             sys.exit(0)
 
+    def open_settings(self):
+        dialog = SettingsDialog(self)
+        dialog.exec_()
+    
     def init_ui(self):
         self.setWindowTitle("DevFlow")
         self.showMaximized()
@@ -79,7 +84,26 @@ class UI(QWidget):
             }
         """)
         header_layout.addWidget(logo_label)
-        header_layout.addStretch()  # Push logo to left
+        header_layout.addStretch()  # Push logo to left and settings to right
+        
+        # Add settings button
+        settings_button = QPushButton("Settings")
+        settings_button.setFixedSize(100, 30)
+        settings_button.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                color: #FFFFFF;
+                border: none;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                color: #00A884;
+            }
+        """)
+        settings_button.setCursor(Qt.PointingHandCursor)
+        settings_button.clicked.connect(self.open_settings)
+        header_layout.addWidget(settings_button)
         
         # Add header to main layout
         layout.addWidget(header)
@@ -104,7 +128,7 @@ class UI(QWidget):
         chat_interface = ChatInterface(self.store)
         
         # Set width for chat container (1/3 of screen width)
-        chat_width = int(screen.width() * 0.3)  # 33% of screen width
+        chat_width = int(screen.width() * 0.32)  # 33% of screen width
         chat_interface.setMinimumWidth(chat_width)
         chat_interface.setMaximumWidth(chat_width)
         
