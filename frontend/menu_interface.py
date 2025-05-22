@@ -589,6 +589,9 @@ class ExpandableMenu(QWidget):
             self.content_widgets.append(content)
 
             button.clicked.connect(lambda checked, index=i: self.toggle_content(index))
+        
+        self.toggle_content(0)
+        self.buttons[0].setStyleSheet(self.buttons[0].styleSheet().replace("background-color: #2A2F32", "background-color: #3A3F41"))
 
     def show_error_dialog(self, error_msg, error_id, operation):
         try:

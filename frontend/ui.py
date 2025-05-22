@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, 
-                            QSplitter, QScrollArea, QMessageBox)
+                            QSplitter, QScrollArea, QMessageBox,
+                            QLabel, QHBoxLayout)
 from PyQt5.QtCore import Qt
 import sys
 import os
@@ -46,12 +47,42 @@ class UI(QWidget):
                 sys.exit(1)
         else:
             sys.exit(0)
-    
+
     def init_ui(self):
         self.setWindowTitle("DevFlow")
         self.showMaximized()
 
         layout = QVBoxLayout()
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Create header
+        header = QWidget()
+        header.setFixedHeight(50)  # Fixed height for header
+        header.setStyleSheet("""
+            QWidget {
+                background-color: #1A242D;
+                border-bottom: 1px solid #2A353F;
+            }
+        """)
+        
+        header_layout = QHBoxLayout(header)
+        header_layout.setContentsMargins(20, 0, 20, 0)
+        
+        logo_label = QLabel("DevFlow")
+        logo_label.setStyleSheet("""
+            QLabel {
+                color: #00A884;
+                font-size: 24px;
+                font-weight: bold;
+                font-family: 'Arial', sans-serif;
+            }
+        """)
+        header_layout.addWidget(logo_label)
+        header_layout.addStretch()  # Push logo to left
+        
+        # Add header to main layout
+        layout.addWidget(header)
         
         # Create main horizontal splitter
         splitter = QSplitter(Qt.Horizontal)
