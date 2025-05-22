@@ -4,16 +4,17 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QPushButton,
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtWidgets import QApplication
 from backend.project_config import ProjectConfig
-
+from collections import deque
 from backend.ai_model import generate_response
 
 class Worker(QThread):
     finished = pyqtSignal(str)
 
-    def __init__(self, store, query, parent = None):
+    def __init__(self, store, query, chat_history="", parent=None):
         super().__init__(parent)
         self.store = store
         self.query = query
+        self.chat_history = chat_history
         self.project_config = ProjectConfig()
     
     def make_rag_prompt(self, query, relevant_chunks):
@@ -30,6 +31,8 @@ class Worker(QThread):
         - Project file structure
         - Current implementation details
         - Environment setup status (venv and git)
+        
+        {self.chat_history}
         
         Use this context to provide more accurate and relevant answers. If the question is about implementation, refer to the existing implementation details in the context.
         
@@ -55,6 +58,7 @@ class ChatInterface(QWidget):
     def __init__(self, store, parent=None):
         super().__init__(parent)
         self.store = store
+        self.chat_history = deque(maxlen=5)  
         self.init_chat_interface()
     
     def init_chat_interface(self):
@@ -197,6 +201,14 @@ class ChatInterface(QWidget):
         self.chat_list.setItemWidget(item, container)
         self.chat_list.scrollToBottom()
 
+    def format_chat_history(self):
+        history_text = ""
+        if self.chat_history:
+            history_text = "Previous conversation context:\n"
+            for query, response in self.chat_history:
+                history_text += f"User: {query}\nDevFlow Bot: {response}\n\n"
+        return history_text
+
     def handle_submit(self):
         user_query = self.input_field.text()
         if not user_query:
@@ -207,9 +219,12 @@ class ChatInterface(QWidget):
 
         QApplication.processEvents()
 
-        self.worker = Worker(self.store, user_query)
-        self.worker.finished.connect(self.on_response_ready)
+        self.worker = Worker(self.store, user_query, self.format_chat_history())
+        self.worker.finished.connect(lambda response: self.on_response_ready(user_query, response))
         self.worker.start()
     
-    def on_response_ready(self, response):
+    def on_response_ready(self, query, response):
         self.add_message('DevFlow Bot', response)
+        
+        # Add to chat history and maintain only last 3 conversations
+        self.chat_history.append((query, response))
