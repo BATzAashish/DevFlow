@@ -827,7 +827,12 @@ class ExpandableMenu(QWidget):
             
         try:
             # Generate structure using Gemini
-            prompt = f"Generate a professional and detailed file structure for a project named \"{self.config.project_name}\". The project description is: \"{self.config.project_description}\". The tech stack to be used is: \"{self.config.tech_stack}\". Provide ONLY the file structure in a clear, hierarchical format. Do not include any explanations, descriptions, or code snippets."
+            prompt = f"""
+Generate a professional and detailed file structure for a project named \"{self.config.project_name}\". The project description is: \"{self.config.project_description}\". The tech stack to be used is: \"{self.config.tech_stack}\".\n
+Provide ONLY the file structure in a clear, hierarchical format, focusing on core project files (e.g., source code, templates, configuration files).\n
+Exclude files or directories related to testing (e.g., tests), requirements (e.g., requirements.txt, package.json), licenses (e.g., LICENSE), or version control (e.g., .gitignore).\n
+Do not include any explanations, descriptions, or code snippets.
+"""
             response = generate_response(prompt)
                         
             # Update the UI and save to config
