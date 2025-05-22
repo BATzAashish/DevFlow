@@ -24,6 +24,15 @@ class Worker(QThread):
         PROJECT CONTEXT:
         {project_info}
         
+        You have access to:
+        - Project description
+        - Tech stack being used
+        - Project file structure
+        - Current implementation details
+        - Environment setup status (venv and git)
+        
+        Use this context to provide more accurate and relevant answers. If the question is about implementation, refer to the existing implementation details in the context.
+        
         QUESTION: '{query}'
         REFERENCE CHUNKS: '{escaped_chunks}'
         

@@ -15,6 +15,9 @@ class ProjectConfig:
         self.has_venv = False
         self.has_git = False
         self.file_structure = ""
+        self.implementation = ""
+        self.testing_strategy = ""
+        self.deployment_strategy = ""
         
     @property
     def is_tech_stack_set(self):
@@ -42,7 +45,16 @@ class ProjectConfig:
 
     def update_file_structure(self, structure):
         self.file_structure = structure
+    
+    def update_implementation(self, implementation):
+        self.implementation = implementation
 
+    def update_testing_strategy(self, strategy):
+        self.testing_strategy = strategy
+        
+    def update_deployment_strategy(self, strategy):
+        self.deployment_strategy = strategy
+        
     def get_project_info(self):
         return {
             "path": self.project_path,
@@ -51,5 +63,8 @@ class ProjectConfig:
             "tech_stack": self.tech_stack,
             "file_structure": self.file_structure,
             "has_venv": self.has_venv,
-            "has_git": self.has_git
+            "has_git": self.has_git,
+            "implementation": self.implementation,
+            "testing_strategy": self.testing_strategy,
+            "deployment_strategy": self.deployment_strategy
         }

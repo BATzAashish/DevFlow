@@ -35,13 +35,12 @@ class ExpandableMenu(QWidget):
             "Step 2: Environment and Repository Setup",
             "Step 3: Create Project Structure",
             "Step 4: Implementation",
-            "Window 5",
-            "Window 6",
-            "Window 7",
-            "Window 8"
+            "Step 5: Testing Strategy",
+            "Step 6: Deployment Strategy",
+            "Window 7"
         ]
         
-        for i in range(8):
+        for i in range(len(step_names)):
             # Create button and content
             button = QPushButton(step_names[i], self)
             content = QFrame()
@@ -355,6 +354,129 @@ class ExpandableMenu(QWidget):
                 implementation_frame_layout.addWidget(generate_button)
 
                 content_layout.addWidget(implementation_frame)
+            elif i == 4:  # Step 5: Testing Strategy
+                # Create a frame for testing strategy
+                testing_frame = QFrame()
+                testing_frame.setStyleSheet("""
+                    QFrame {
+                        background-color: #1E2428;
+                        border: 1px solid #3F3F41;
+                        border-radius: 4px;
+                        margin: 5px;
+                    }
+                """)
+                testing_frame_layout = QVBoxLayout(testing_frame)
+                testing_frame_layout.setContentsMargins(15, 15, 15, 15)
+
+                # Create text edit for testing display
+                self.testing_text = QTextEdit()
+                self.testing_text.setReadOnly(True)
+                self.testing_text.setText("No testing strategy generated yet")
+                self.testing_text.setStyleSheet("""
+                    QTextEdit {
+                        color: white;
+                        padding: 15px;
+                        background-color: #2A2F32;
+                        border: none;
+                        border-radius: 4px;
+                        font-family: "Consolas", "Monaco", "Courier New", monospace;
+                        font-size: 12px;
+                        line-height: 1.5;
+                        letter-spacing: 0.3px;
+                    }
+                    QTextEdit:focus {
+                        border: none;
+                        outline: none;
+                    }
+                """)
+                self.testing_text.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+                self.testing_text.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+                self.testing_text.setMinimumHeight(300)
+                
+                testing_frame_layout.addWidget(self.testing_text)
+
+                # Generate button
+                generate_button = QPushButton("Generate Testing Strategy")
+                generate_button.setFixedHeight(35)
+                generate_button.setStyleSheet("""
+                    QPushButton {
+                        background-color: #00A884;
+                        color: white;
+                        border: none;
+                        padding: 8px;
+                        border-radius: 4px;
+                        font-size: 14px;
+                    }
+                    QPushButton:hover {
+                        background-color: #008C74;
+                    }
+                """)
+                generate_button.clicked.connect(self.generate_testing_strategy)
+                testing_frame_layout.addWidget(generate_button)
+
+                content_layout.addWidget(testing_frame)
+
+            elif i == 5:  # Step 6: Deployment Strategy
+                # Create a frame for deployment strategy
+                deployment_frame = QFrame()
+                deployment_frame.setStyleSheet("""
+                    QFrame {
+                        background-color: #1E2428;
+                        border: 1px solid #3F3F41;
+                        border-radius: 4px;
+                        margin: 5px;
+                    }
+                """)
+                deployment_frame_layout = QVBoxLayout(deployment_frame)
+                deployment_frame_layout.setContentsMargins(15, 15, 15, 15)
+
+                # Create text edit for deployment display
+                self.deployment_text = QTextEdit()
+                self.deployment_text.setReadOnly(True)
+                self.deployment_text.setText("No deployment strategy generated yet")
+                self.deployment_text.setStyleSheet("""
+                    QTextEdit {
+                        color: white;
+                        padding: 15px;
+                        background-color: #2A2F32;
+                        border: none;
+                        border-radius: 4px;
+                        font-family: "Consolas", "Monaco", "Courier New", monospace;
+                        font-size: 12px;
+                        line-height: 1.5;
+                        letter-spacing: 0.3px;
+                    }
+                    QTextEdit:focus {
+                        border: none;
+                        outline: none;
+                    }
+                """)
+                self.deployment_text.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+                self.deployment_text.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+                self.deployment_text.setMinimumHeight(300)
+                
+                deployment_frame_layout.addWidget(self.deployment_text)
+
+                # Generate button
+                generate_button = QPushButton("Generate Deployment Strategy")
+                generate_button.setFixedHeight(35)
+                generate_button.setStyleSheet("""
+                    QPushButton {
+                        background-color: #00A884;
+                        color: white;
+                        border: none;
+                        padding: 8px;
+                        border-radius: 4px;
+                        font-size: 14px;
+                    }
+                    QPushButton:hover {
+                        background-color: #008C74;
+                    }
+                """)
+                generate_button.clicked.connect(self.generate_deployment_strategy)
+                deployment_frame_layout.addWidget(generate_button)
+
+                content_layout.addWidget(deployment_frame)
             else:
                 content_layout.addWidget(QLabel(f"Content for {step_names[i]}"))
             content.setVisible(False)
@@ -609,8 +731,10 @@ class ExpandableMenu(QWidget):
             prompt = f"Provide a professional and detailed implementation for a project with this description: \"{self.config.project_description}\". Use {self.config.tech_stack} and implement according to this file structure:\n{self.config.file_structure}"
             response = generate_response(prompt)
             
-            # Update the UI
+            # Update the UI and save to config
             self.implementation_text.setText(response)
+            if hasattr(self.config, 'update_implementation'):
+                self.config.update_implementation(response)
                 
         except Exception as e:
             error_id = str(uuid.uuid4())[:8]
@@ -618,4 +742,56 @@ class ExpandableMenu(QWidget):
                 str(e),
                 error_id,
                 "generating implementation"
+            )
+
+    def generate_testing_strategy(self):
+        if not self.config.tech_stack:
+            QMessageBox.warning(self, "Warning", "Please set up the tech stack first!")
+            return
+            
+        if not self.config.project_description:
+            QMessageBox.warning(self, "Warning", "Project description is not set!")
+            return
+            
+        try:
+            prompt = f"After the development of {self.config.project_description} using {self.config.tech_stack}, recommend the best testing strategies. Include unit testing, integration testing, and any other relevant testing approaches. Provide specific tools and frameworks suitable for this tech stack."
+            response = generate_response(prompt)
+            
+            # Update the UI and save to config
+            self.testing_text.setText(response)
+            if hasattr(self.config, 'update_testing_strategy'):
+                self.config.update_testing_strategy(response)
+                
+        except Exception as e:
+            error_id = str(uuid.uuid4())[:8]
+            self.show_error_dialog(
+                str(e),
+                error_id,
+                "generating testing strategy"
+            )
+
+    def generate_deployment_strategy(self):
+        if not self.config.tech_stack:
+            QMessageBox.warning(self, "Warning", "Please set up the tech stack first!")
+            return
+            
+        if not self.config.project_description:
+            QMessageBox.warning(self, "Warning", "Project description is not set!")
+            return
+            
+        try:
+            prompt = f"After the development of {self.config.project_description} using {self.config.tech_stack}, recommend the best possible deployment methods. Include CI/CD pipeline suggestions, hosting platforms, containerization if applicable, and environment management strategies."
+            response = generate_response(prompt)
+            
+            # Update the UI and save to config
+            self.deployment_text.setText(response)
+            if hasattr(self.config, 'update_deployment_strategy'):
+                self.config.update_deployment_strategy(response)
+                
+        except Exception as e:
+            error_id = str(uuid.uuid4())[:8]
+            self.show_error_dialog(
+                str(e),
+                error_id,
+                "generating deployment strategy"
             )
