@@ -37,7 +37,7 @@ class ExpandableMenu(QWidget):
             "Step 4: Implementation",
             "Step 5: Testing Strategy",
             "Step 6: Deployment Strategy",
-            "Window 7"
+            "Step 7: Documentation"
         ]
         
         for i in range(len(step_names)):
@@ -477,6 +477,93 @@ class ExpandableMenu(QWidget):
                 deployment_frame_layout.addWidget(generate_button)
 
                 content_layout.addWidget(deployment_frame)
+            elif i == 6:  # Step 7: Documentation
+                # Create a frame for documentation
+                docs_frame = QFrame()
+                docs_frame.setStyleSheet("""
+                    QFrame {
+                        background-color: #1E2428;
+                        border: 1px solid #3F3F41;
+                        border-radius: 4px;
+                        margin: 5px;
+                    }
+                """)
+                docs_frame_layout = QVBoxLayout(docs_frame)
+                docs_frame_layout.setContentsMargins(15, 15, 15, 15)
+
+                # Create text edit for README display
+                self.readme_text = QTextEdit()
+                self.readme_text.setReadOnly(True)
+                self.readme_text.setText("No README generated yet")
+                self.readme_text.setStyleSheet("""
+                    QTextEdit {
+                        color: white;
+                        padding: 15px;
+                        background-color: #2A2F32;
+                        border: none;
+                        border-radius: 4px;
+                        font-family: "Consolas", "Monaco", "Courier New", monospace;
+                        font-size: 12px;
+                        line-height: 1.5;
+                        letter-spacing: 0.3px;
+                    }
+                    QTextEdit:focus {
+                        border: none;
+                        outline: none;
+                    }
+                """)
+                self.readme_text.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+                self.readme_text.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+                self.readme_text.setMinimumHeight(300)
+                
+                docs_frame_layout.addWidget(self.readme_text)
+
+                # Button container for the two buttons
+                button_container = QHBoxLayout()
+                button_container.setSpacing(10)
+
+                # Generate button
+                generate_button = QPushButton("Generate README")
+                generate_button.setFixedHeight(35)
+                generate_button.setStyleSheet("""
+                    QPushButton {
+                        background-color: #00A884;
+                        color: white;
+                        border: none;
+                        padding: 8px;
+                        border-radius: 4px;
+                        font-size: 14px;
+                        min-width: 120px;
+                    }
+                    QPushButton:hover {
+                        background-color: #008C74;
+                    }
+                """)
+                generate_button.clicked.connect(self.generate_readme)
+                button_container.addWidget(generate_button)
+
+                # Save button
+                save_button = QPushButton("Save README")
+                save_button.setFixedHeight(35)
+                save_button.setStyleSheet("""
+                    QPushButton {
+                        background-color: #6495ED;
+                        color: white;
+                        border: none;
+                        padding: 8px;
+                        border-radius: 4px;
+                        font-size: 14px;
+                        min-width: 120px;
+                    }
+                    QPushButton:hover {
+                        background-color: #5785DD;
+                    }
+                """)
+                save_button.clicked.connect(self.save_readme)
+                button_container.addWidget(save_button)
+
+                docs_frame_layout.addLayout(button_container)
+                content_layout.addWidget(docs_frame)
             else:
                 content_layout.addWidget(QLabel(f"Content for {step_names[i]}"))
             content.setVisible(False)
@@ -794,4 +881,100 @@ class ExpandableMenu(QWidget):
                 str(e),
                 error_id,
                 "generating deployment strategy"
+            )
+
+    def clean_markdown_content(self, content):
+        """Clean markdown content by removing only the outermost backticks.
+        Preserves all inner code blocks and their formatting."""
+        # If content doesn't start with backticks, no need to process
+        if not content.startswith("```"):
+            return content
+        
+        # Split into lines
+        lines = content.split("\n")
+        
+        # Remove first line if it contains the opening backticks
+        if lines[0].startswith("```"):
+            lines = lines[1:]
+        
+        # Remove last line if it only contains closing backticks
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        
+        # Join the lines back together, preserving all inner content exactly as is
+        return "\n".join(lines).strip()
+
+    def generate_readme(self):
+        if not self.config.tech_stack:
+            QMessageBox.warning(self, "Warning", "Please set up the tech stack first!")
+            return
+            
+        if not self.config.project_description:
+            QMessageBox.warning(self, "Warning", "Project description is not set!")
+            return
+            
+        try:
+            # Create a comprehensive prompt that includes all relevant project information
+            prompt = f"""Generate a professional README.md file for a software project with these details:
+
+Project Name: {self.config.project_name}
+Description: {self.config.project_description}
+Tech Stack: {self.config.tech_stack}
+
+Additional Context:
+- Project Structure: {self.config.file_structure}
+- Virtual Environment: {'Enabled' if self.config.has_venv else 'Not enabled'}
+- Git Repository: {'Initialized' if self.config.has_git else 'Not initialized'}
+- Implementation Details: {self.config.implementation}
+
+Please create a comprehensive README.md that includes:
+1. Project Title and Description
+2. Features and Highlights
+3. Prerequisites and Setup Instructions
+4. Installation Steps
+5. Usage Examples
+6. Project Structure Overview
+"""
+
+            response = generate_response(prompt)
+            
+            # Clean the response
+            cleaned_response = self.clean_markdown_content(response)
+            
+            # Update the UI and save to config
+            self.readme_text.setText(cleaned_response)
+            if hasattr(self.config, 'update_readme'):
+                self.config.update_readme(cleaned_response)
+                
+        except Exception as e:
+            error_id = str(uuid.uuid4())[:8]
+            self.show_error_dialog(
+                str(e),
+                error_id,
+                "generating README"
+            )
+
+    def save_readme(self):
+        if not self.config.project_path:
+            QMessageBox.warning(self, "Warning", "Please set up the project path first!")
+            return
+            
+        readme_content = self.readme_text.toPlainText()
+        if not readme_content or readme_content == "No README generated yet":
+            QMessageBox.warning(self, "Warning", "Please generate the README first!")
+            return
+            
+        try:
+            readme_path = os.path.join(self.config.project_path, 'README.md')
+            with open(readme_path, 'w') as f:
+                f.write(readme_content)
+            
+            QMessageBox.information(self, "Success", f"README.md has been saved to:\n{readme_path}")
+                
+        except Exception as e:
+            error_id = str(uuid.uuid4())[:8]
+            self.show_error_dialog(
+                str(e),
+                error_id,
+                "saving README file"
             )

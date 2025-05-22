@@ -18,6 +18,7 @@ class ProjectConfig:
         self.implementation = ""
         self.testing_strategy = ""
         self.deployment_strategy = ""
+        self.readme = ""
         
     @property
     def is_tech_stack_set(self):
@@ -55,6 +56,9 @@ class ProjectConfig:
     def update_deployment_strategy(self, strategy):
         self.deployment_strategy = strategy
         
+    def update_readme(self, readme):
+        self.readme = readme
+        
     def get_project_info(self):
         return {
             "path": self.project_path,
@@ -66,5 +70,6 @@ class ProjectConfig:
             "has_git": self.has_git,
             "implementation": self.implementation,
             "testing_strategy": self.testing_strategy,
-            "deployment_strategy": self.deployment_strategy
+            "deployment_strategy": self.deployment_strategy,
+            "readme": self.readme
         }
