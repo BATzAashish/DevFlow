@@ -818,7 +818,29 @@ class ExpandableMenu(QWidget):
             return
             
         try:
-            prompt = f"Provide a professional and detailed implementation for a project with this description: \"{self.config.project_description}\". Use {self.config.tech_stack} and implement according to this file structure:\n{self.config.file_structure}"
+            prompt = f"""
+Generate a professional and detailed implementation for a project with the description: \"{self.config.project_description}\". Use the tech stack: {self.config.tech_stack}, and implement according to this file structure:
+{self.config.file_structure}
+
+Return the output in the following JSON format ONLY, with no additional explanations or text outside the JSON structure:
+
+{{
+    \"files\": {{
+        \"file_name_1\": \"code_content_1\",
+        \"file_name_2\": \"code_content_2\",
+        ...
+    }},
+    \"setup_steps\": [
+        [\"command_1\", \"terminal_command\"],
+        [\"command_2\", \"general_command\"],
+        ...
+    ]
+}}
+
+- The `files` object should map each file name (as a string) to its complete code content (as a string, with proper formatting and indentation preserved).
+- The `setup_steps` array should list steps required to get the code running, where each step is a 2D array with the command (as a string) and its type ('terminal_command' for commands to run in a terminal, or 'general_command' for other instructions like downloading software).
+- Ensure all commands and code are tailored to the tech stack and project requirements.
+"""
             response = generate_response(prompt)
             
             # Update the UI and save to config
