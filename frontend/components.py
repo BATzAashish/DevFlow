@@ -4,74 +4,65 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QClipboard, QGuiApplication
 
 class CodeSnippetWidget(QWidget):
-    def __init__(self, title, code, parent=None):
+    def __init__(self, code, parent=None):
         super().__init__(parent)
         self.code = code
-        self.setup_ui(title)
+        self.setup_ui()
     
-    def setup_ui(self, title):
+    def setup_ui(self):
         layout = QVBoxLayout(self)
-        layout.setSpacing(5)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
         
-        # Header with title and copy button
-        header = QWidget()
-        header_layout = QHBoxLayout(header)
-        header_layout.setContentsMargins(10, 5, 10, 5)
-        
-        title_label = QLabel(title)
-        title_label.setStyleSheet("""
-            QLabel {
-                color: white;
-                font-weight: bold;
-                font-size: 13px;
-            }
-        """)
-        header_layout.addWidget(title_label)
-        
-        copy_button = QPushButton("Copy")
-        copy_button.setFixedSize(60, 25)
-        copy_button.setStyleSheet("""
-            QPushButton {
-                background-color: #404B53;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                padding: 4px 8px;
-                font-size: 12px;
-            }
-            QPushButton:hover {
-                background-color: #515B63;
-            }
-        """)
-        copy_button.clicked.connect(self.copy_code)
-        header_layout.addWidget(copy_button)
-        
-        layout.addWidget(header)
-        
-        # Code content
+        # Code content container
         code_frame = QFrame()
         code_frame.setStyleSheet("""
             QFrame {
-                background-color: #1E2428;
-                border: 1px solid #3F3F41;
-                border-radius: 4px;
-                padding: 10px;
+                background-color: #1E1E1E;
+                border: none;
+                border-radius: 6px;
             }
         """)
-        code_layout = QVBoxLayout(code_frame)
-        code_layout.setContentsMargins(10, 10, 10, 10)
         
+        # Main horizontal layout for code and copy button
+        code_layout = QHBoxLayout(code_frame)
+        code_layout.setContentsMargins(15, 12, 12, 12)
+        code_layout.setSpacing(15)
+        
+        # Code text with proper styling
         code_label = QLabel(self.code)
         code_label.setStyleSheet("""
             QLabel {
                 color: #E0E0E0;
                 font-family: "Consolas", "Monaco", "Courier New", monospace;
-                font-size: 12px;
-                line-height: 1.5;
+                font-size: 13px;
+                line-height: 1.6;
+                letter-spacing: 0.3px;
             }
         """)
         code_label.setWordWrap(True)
-        code_layout.addWidget(code_label)
+        code_layout.addWidget(code_label, stretch=1)
+        
+        # Copy button with improved styling
+        copy_button = QPushButton("📋 Copy")
+        copy_button.setFixedSize(100, 28)  # Increased width from 80 to 100
+        copy_button.setStyleSheet("""
+            QPushButton {
+                background-color: #2D3439;
+                color: #E0E0E0;
+                border: 1px solid #404B53;
+                border-radius: 4px;
+                padding: 4px 8px;
+                font-size: 13px;
+                min-width: 100px;
+            }
+            QPushButton:hover {
+                background-color: #404B53;
+                border-color: #515B63;
+            }
+        """)
+        copy_button.clicked.connect(self.copy_code)
+        code_layout.addWidget(copy_button, alignment=Qt.AlignTop)
         
         layout.addWidget(code_frame)
         
@@ -86,58 +77,73 @@ class CommandWidget(QWidget):
         self.setup_ui(is_terminal)
     
     def setup_ui(self, is_terminal):
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 2, 0, 2)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         
         if is_terminal:
-            # Command box with copy button
-            cmd_container = QFrame()
-            cmd_container.setStyleSheet("""
+            # Terminal command container
+            cmd_frame = QFrame()
+            cmd_frame.setStyleSheet("""
                 QFrame {
-                    background-color: #1E2428;
-                    border: 1px solid #3F3F41;
-                    border-radius: 4px;
+                    background-color: #1E1E1E;
+                    border: none;
+                    border-radius: 6px;
                 }
             """)
-            cmd_layout = QHBoxLayout(cmd_container)
-            cmd_layout.setContentsMargins(10, 5, 10, 5)
             
-            cmd_label = QLabel(self.command)
+            # Main horizontal layout
+            cmd_layout = QHBoxLayout(cmd_frame)
+            cmd_layout.setContentsMargins(15, 12, 12, 12)
+            cmd_layout.setSpacing(15)
+            
+            # Command text with icon
+            cmd_text = f"$ {self.command}"
+            cmd_label = QLabel(cmd_text)
             cmd_label.setStyleSheet("""
                 QLabel {
                     color: #E0E0E0;
                     font-family: "Consolas", "Monaco", "Courier New", monospace;
-                    font-size: 12px;
+                    font-size: 13px;
+                    line-height: 1.6;
+                    letter-spacing: 0.3px;
                 }
             """)
-            cmd_layout.addWidget(cmd_label)
+            cmd_label.setWordWrap(True)
+            cmd_layout.addWidget(cmd_label, stretch=1)
             
-            copy_button = QPushButton("Copy")
-            copy_button.setFixedSize(60, 25)
+            # Copy button with improved styling
+            copy_button = QPushButton("📋 Copy")
+            copy_button.setFixedSize(100, 28)  # Increased width from 80 to 100
             copy_button.setStyleSheet("""
                 QPushButton {
-                    background-color: #404B53;
-                    color: white;
-                    border: none;
+                    background-color: #2D3439;
+                    color: #E0E0E0;
+                    border: 1px solid #404B53;
                     border-radius: 4px;
                     padding: 4px 8px;
-                    font-size: 12px;
+                    font-size: 13px;
+                    min-width: 100px;
                 }
                 QPushButton:hover {
-                    background-color: #515B63;
+                    background-color: #404B53;
+                    border-color: #515B63;
                 }
             """)
             copy_button.clicked.connect(self.copy_command)
-            cmd_layout.addWidget(copy_button)
+            cmd_layout.addWidget(copy_button, alignment=Qt.AlignTop)
             
-            layout.addWidget(cmd_container)
+            layout.addWidget(cmd_frame)
         else:
-            # Regular text for general commands
+            # Regular command text (not in a terminal box)
             label = QLabel(self.command)
             label.setStyleSheet("""
                 QLabel {
-                    color: white;
-                    font-size: 12px;
+                    color: #E0E0E0;
+                    font-size: 14px;
+                    line-height: 1.4;
+                    padding-left: 15px;
+                    letter-spacing: 0.3px;
                 }
             """)
             label.setWordWrap(True)

@@ -53,10 +53,11 @@ class ExpandableMenu(QWidget):
             if i == 0:  # Special handling for Step 1
                 # Create a frame to act as a text box
                 tech_frame = QFrame()
+                # Tech frame styling
                 tech_frame.setStyleSheet("""
                     QFrame {
                         background-color: #1E2428;
-                        border: 1px solid #3A3F41;
+                        border: none;
                         border-radius: 4px;
                         margin: 5px;
                     }
@@ -317,8 +318,40 @@ class ExpandableMenu(QWidget):
                         background-color: transparent;
                         border: none;
                     }
+                    QScrollBar:vertical {
+                        border: none;
+                        background: #121B22;
+                        width: 10px;
+                        margin: 0px;
+                    }
+                    QScrollBar::handle:vertical {
+                        background-color: #404B53;
+                        min-height: 30px;
+                        border-radius: 5px;
+                        margin: 3px 2px 3px 2px;
+                    }
+                    QScrollBar::handle:vertical:hover {
+                        background-color: #515B63;
+                    }
+                    QScrollBar::add-line:vertical,
+                    QScrollBar::sub-line:vertical {
+                        height: 0px;
+                    }
+                    QScrollBar::add-page:vertical,
+                    QScrollBar::sub-page:vertical {
+                        background: none;
+                        height: 0px;
+                    }
+                    QScrollBar::up-arrow:vertical,
+                    QScrollBar::down-arrow:vertical {
+                        background: none;
+                    }
+                    QScrollBar:horizontal {
+                        height: 0px;
+                        background: transparent;
+                    }
                 """)
-                
+
                 # Container for implementation content
                 self.implementation_container = QWidget()
                 self.implementation_container.setStyleSheet("""
@@ -337,8 +370,8 @@ class ExpandableMenu(QWidget):
                 
                 scroll_area.setWidget(self.implementation_container)
                 
-                # Add scroll area to frame layout
-                scroll_area.setMinimumHeight(300)
+                # Add scroll area to frame layout and set proper height
+                scroll_area.setMinimumHeight(400)  # Increased height to make content more visible
                 implementation_frame_layout.addWidget(scroll_area)
 
                 # Generate button
@@ -364,10 +397,11 @@ class ExpandableMenu(QWidget):
             elif i == 4:  # Step 5: Testing Strategy
                 # Create a frame for testing strategy
                 testing_frame = QFrame()
+                # Testing frame styling
                 testing_frame.setStyleSheet("""
                     QFrame {
                         background-color: #1E2428;
-                        border: 1px solid #3F3F41;
+                        border: none;
                         border-radius: 4px;
                         margin: 5px;
                     }
@@ -426,10 +460,11 @@ class ExpandableMenu(QWidget):
             elif i == 5:  # Step 6: Deployment Strategy
                 # Create a frame for deployment strategy
                 deployment_frame = QFrame()
+                # Deployment frame styling
                 deployment_frame.setStyleSheet("""
                     QFrame {
                         background-color: #1E2428;
-                        border: 1px solid #3F3F41;
+                        border: none;
                         border-radius: 4px;
                         margin: 5px;
                     }
@@ -487,10 +522,11 @@ class ExpandableMenu(QWidget):
             elif i == 6:  # Step 7: Documentation
                 # Create a frame for documentation
                 docs_frame = QFrame()
+                # Documentation frame styling
                 docs_frame.setStyleSheet("""
                     QFrame {
                         background-color: #1E2428;
-                        border: 1px solid #3F3F41;
+                        border: none;
                         border-radius: 4px;
                         margin: 5px;
                     }
@@ -869,7 +905,6 @@ Return the output in the following JSON format ONLY, with no additional explanat
             try:
                 # Try parsing the cleaned JSON to validate it
                 json.loads(cleaned_json)
-                print("JSON parsing successful!")
             except json.JSONDecodeError as je:
                 print(f"JSON parsing failed. Error: {str(je)}")
                 print("Position of error:", je.pos)
@@ -1044,26 +1079,140 @@ Please create a comprehensive README.md that includes:
         
         try:
             data = json.loads(json_str)
+            main_layout = self.implementation_container.layout()
+            main_layout.setSpacing(30)  # Increase spacing between major sections
+            main_layout.setContentsMargins(20, 10, 20, 20)  # Add padding around everything
             
             # Add file implementations
             if 'files' in data:
-                file_label = QLabel("Generated Files:")
-                file_label.setStyleSheet("color: #00A884; font-size: 16px; font-weight: bold;")
-                self.implementation_container.layout().addWidget(file_label)
+                # Files Section Container
+                files_section = QWidget()
+                files_section_layout = QVBoxLayout(files_section)
+                files_section_layout.setContentsMargins(0, 0, 0, 20)  # Add bottom margin
+                
+                # Files Section Label
+                file_label = QLabel("Generated Files")
+                file_label.setStyleSheet("""
+                    color: #00A884; 
+                    font-size: 20px; 
+                    font-weight: bold;
+                    margin-bottom: 20px;
+                    border: none;
+                """)
+                files_section_layout.addWidget(file_label)
+                
+                # Files Container
+                files_container = QWidget()
+                files_layout = QVBoxLayout(files_container)
+                files_layout.setSpacing(25)  # Increase space between files
+                files_layout.setContentsMargins(0, 0, 0, 0)
                 
                 for file_name, content in data['files'].items():
-                    snippet = CodeSnippetWidget(file_name, content)
-                    self.implementation_container.layout().addWidget(snippet)
+                    # File Container
+                    file_container = QWidget()
+                    file_layout = QVBoxLayout(file_container)
+                    file_layout.setSpacing(10)  # Space between filename and content
+                    file_layout.setContentsMargins(0, 0, 0, 0)
+                    
+                    # File name with icon
+                    file_name_label = QLabel(f"📄 {file_name}")
+                    file_name_label.setStyleSheet("""
+                        color: white;
+                        font-size: 16px;
+                        font-weight: bold;
+                        background-color: transparent;
+                        border: none;
+                        padding: 5px 0;
+                    """)
+                    file_layout.addWidget(file_name_label)
+                    
+                    # Code snippet
+                    snippet = CodeSnippetWidget(content)
+                    snippet.setStyleSheet("""
+                        QWidget {
+                            background-color: #1E1E1E;
+                            border-radius: 6px;
+                            padding: 15px;
+                        }
+                    """)
+                    file_layout.addWidget(snippet)
+                    
+                    files_layout.addWidget(file_container)
+                
+                files_section_layout.addWidget(files_container)
+                main_layout.addWidget(files_section)
             
             # Add setup steps
             if 'setup_steps' in data:
-                steps_label = QLabel("Setup Steps:")
-                steps_label.setStyleSheet("color: #00A884; font-size: 16px; font-weight: bold;")
-                self.implementation_container.layout().addWidget(steps_label)
+                # Steps Section Container
+                steps_section = QWidget()
+                steps_section_layout = QVBoxLayout(steps_section)
+                steps_section_layout.setContentsMargins(0, 0, 0, 0)
                 
-                for command, cmd_type in data['setup_steps']:
-                    cmd_widget = CommandWidget(command, cmd_type == 'terminal_command')
-                    self.implementation_container.layout().addWidget(cmd_widget)
+                # Steps Section Label
+                steps_label = QLabel("Setup Instructions")
+                steps_label.setStyleSheet("""
+                    color: #00A884; 
+                    font-size: 20px; 
+                    font-weight: bold;
+                    margin-bottom: 20px;
+                    border: none;
+                """)
+                steps_section_layout.addWidget(steps_label)
+                
+                # Steps Container
+                steps_container = QWidget()
+                steps_layout = QVBoxLayout(steps_container)
+                steps_layout.setSpacing(20)  # Increase space between steps
+                steps_layout.setContentsMargins(0, 0, 0, 0)
+                
+                for i, (command, cmd_type) in enumerate(data['setup_steps'], 1):
+                    # Step Container
+                    step_container = QWidget()
+                    step_layout = QVBoxLayout(step_container)
+                    step_layout.setSpacing(8)
+                    step_layout.setContentsMargins(0, 0, 0, 0)
+                    
+                    # Step number with icon
+                    step_label = QLabel(f"Step {i}")
+                    step_label.setStyleSheet("""
+                        color: #66D9EF;
+                        font-size: 16px;
+                        font-weight: bold;
+                        background-color: transparent;
+                        border: none;
+                        padding: 5px 0;
+                    """)
+                    step_layout.addWidget(step_label)
+                    
+                    if cmd_type == 'terminal_command':
+                        # Terminal command box
+                        cmd_widget = CommandWidget(command, True)  # Set terminal=True
+                        cmd_widget.setStyleSheet("""
+                            QWidget {
+                                background-color: #1E1E1E;
+                                border-radius: 6px;
+                                padding: 12px;
+                            }
+                        """)
+                        step_layout.addWidget(cmd_widget)
+                    else:
+                        # Instruction text
+                        cmd_label = QLabel(command)
+                        cmd_label.setStyleSheet("""
+                            color: #E0E0E0;
+                            font-size: 14px;
+                            line-height: 1.4;
+                            padding: 5px 15px;
+                            border: none;
+                        """)
+                        cmd_label.setWordWrap(True)
+                        step_layout.addWidget(cmd_label)
+                    
+                    steps_layout.addWidget(step_container)
+                
+                steps_section_layout.addWidget(steps_container)
+                main_layout.addWidget(steps_section)
             
         except json.JSONDecodeError as e:
             error_label = QLabel("Error parsing implementation JSON")
