@@ -10,10 +10,14 @@ from backend.pdf_processor import process_pdf
 from backend.ai_model import summarize_query
 
 load_dotenv()
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
-genai.configure(api_key=GEMINI_API_KEY)
 persist_directory = os.path.join(os.getcwd(), "chroma_db")  # Store in a local directory
+
+def configure_gemini():
+    """Configure Gemini API with the current API key"""
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("Gemini API key not found in environment variables")
+    genai.configure(api_key=api_key)
 
 cross_encoder_model = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
 
@@ -55,6 +59,7 @@ class VectorStore:
         '''
         Extract text fromm PDF, generate embeddings, and store in ChromaDB
         '''
+        configure_gemini()  
         file_hash = get_file_hash(pdf_path)
         text_chunks = process_pdf(pdf_path)
         metadata = {"source": pdf_path, "file_hash": file_hash}
@@ -90,6 +95,7 @@ class VectorStore:
         '''
         Retrieve the most relevant chunks from ChromaDB based on query
         '''
+        configure_gemini()  
         summarized_query = summarize_query(query_text)
         print(f"Original query: {query_text}")
         print(f"Summarized query: {summarized_query}")
