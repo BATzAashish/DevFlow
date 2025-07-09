@@ -1,4 +1,4 @@
-# DevFlow: AI Programming Assistant
+# DevFlow: AI Developer Assistant
 
 ## Overview
 DevFlow is a comprehensive AI-powered desktop application designed to revolutionize the software development workflow. By combining Retrieval-Augmented Generation (RAG) with the Google Gemini API, DevFlow provides an intelligent assistant that guides developers through every phase of project development, from initial planning to deployment and documentation.
